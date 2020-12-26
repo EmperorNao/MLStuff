@@ -16,7 +16,7 @@ double test_deriv(double x) {
 
 }
 
-double autograd(double x) {
+double autog(double x) {
 
 	double eps = 0.00001;
 	return (test_func(x + eps) - test_func(x)) / eps;
@@ -41,10 +41,9 @@ std::vector<double> test_deriv_n_dim(std::vector<double> x) {
 int main() {
 
 	std::cout << "F(x)=" << " 3^(-x) + 3^(x-2) + 2"<< std::endl;
-	double x_min = grad_descent_1d(test_func, autograd, 0, 0.01, 0.00001, true);
+	double x_min = grad_descent_1d(test_func, autog, 0, 0.01, 0.00001, true);
 	std::cout << "x_min = " << x_min << std::endl;
-	std::cout << "F(x_min) = " << test_func(x_min) << std::endl;
-
+	std::cout << "F(x_min) = " << test_func(x_min) << std::endl << std::endl;
 	auto min = grad_descent(test_func_n_dim, test_deriv_n_dim, std::vector<double>(2, 0) , true);
 	for (int i = 0; i < min.size(); i++) {
 
@@ -53,8 +52,18 @@ int main() {
 	}
 
 	std::cout << "F(x_min) = " << test_func_n_dim(min) << std::endl;
+	std::string s;
+	std::cout << "F(x) = ";
+	std::getline(std::cin, s);
+	ArithmeticalExpression expression;
+	expression.set_formula(s); 
+	min = grad_descent_arithm(expression, std::vector<double>(2, 0), true);
+	for (int i = 0; i < min.size(); i++) {
 
+		std::cout << "x_m"<< i <<" = " << min[i] << std::endl;
 
-	
+	}
+
+	std::cout << "F(x_min) = " << expression.count(min) << std::endl;
 
 }
