@@ -9,6 +9,48 @@
 
 const std::string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
+double _sum(double a, double b) {
+
+	return a + b;
+
+}
+
+double _sub(double a, double b) {
+
+	return a - b;
+
+}
+
+double _mult(double a, double b) {
+
+	return a * b;
+
+}
+
+double _div(double a, double b) {
+
+	return a / b;
+
+}
+
+double _log(double a) {
+
+	return log(a);
+
+}
+
+double _opp(double a) {
+
+	return -a;
+
+}
+
+double _expo(double a, double b) {
+
+	return pow(a, b);
+
+}
+
 typedef struct {
 
 	int priority;
@@ -25,7 +67,7 @@ typedef struct {
 
 
 
-class ArithemticalExpression
+class ArithmeticalExpression
 {
 
 private:
@@ -33,11 +75,11 @@ private:
 
 	//std::string chars_binary_operations;
 	//std::vector<std::function<double(double, double)>> binary_operations;
-	std::map <std::string, binary_operation> binary_operations;
+	std::map<std::string, binary_operation> binary_operations;
 
 	//std::string chars_unary_operations;
 	//std::vector<std::function<double(double)>> unary_operations;
-	std::map <std::string, unary_operation> unary_operations;
+	std::map<std::string, unary_operation> unary_operations;
 
 	std::string chars_variables;
 
@@ -74,7 +116,7 @@ private:
 
 	bool is_digit(char c) {
 
-		return (c >= '0') and (c <= '9');
+		return (((c >= '0') and (c <= '9')) or (c == '.'));
 
 	}
 
@@ -109,8 +151,11 @@ private:
 
 			std::string current;
 			current += s[i];
+			if (current == " ") {
+				result += s[i];
 
-			if (is_variable(current[0])) {
+			}
+			else if (is_variable(current[0])) {
 
 				if (i + 1 < len) {
 
@@ -149,7 +194,8 @@ private:
 
 				}
 			}
-			else if (is_digit(current[0])) {
+
+			if (is_digit(current[0])) {
 
 				while ((i + 1 < len) and (is_digit(s[i + 1]))) {
 
@@ -161,13 +207,13 @@ private:
 
 			}
 
-			else if (is_postfix_function(current)) {
+			if (is_prefix_function(current)) {
 
-				result += current;
+				stack.push(current);
 
 			}
 
-			else if (is_prefix_function(current)) {
+			else if (is_postfix_function(current)) {
 
 				stack.push(current);
 
@@ -175,12 +221,14 @@ private:
 
 			else if (current == "(") {
 
+				result += ' ';
 				stack.push(current);
 
 			}
 
 			else if (current == ")") {
 
+				result += ' ';
 				while (!stack.is_empty() and (stack.top() != "(")) {
 
 					result += stack.pop();
@@ -228,18 +276,18 @@ private:
 	}
 
 	// ѕосчитать выражение, использу€ значени€ values
-	bool count_infix(std::vector<double> values) {
+	double count_infix(std::vector<double> values) {
 
 		std::string s = infix;
 		std::string t;
 
 		for (int i = 0; i < s.size(); i++) {
 
-			if (is_variable(s[i]) and (((i + 1 < s.size()) and not is_variable(s[i + 1])) or (i < s.size()))) {
+			if (is_variable(s[i]) and !(((i > 1) and is_variable(s[i - 1]) and is_variable(s[i])) or ((i + 1 < s.size()) and is_variable(s[i]) and is_variable(s[i + 1])))) {
 
 				int pos = chars_variables.find(s[i]);
-				s.erase(pos, 1);
-				s.insert(pos, std::to_string(values[i]));
+				s.erase(i, 1);
+				s.insert(i, (" " + std::to_string(values[pos]) + " "));
 
 
 			}	
@@ -254,8 +302,13 @@ private:
 
 			std::string current;
 			current += s[i];
+			if (current == " ") {
 
-			if (is_digit(current[0])) {
+				i++;
+				continue;
+
+			}
+			if ((is_digit(current[0])) or ((s[i] == '-') and (is_digit(s[i + 1])))) {
 
 				while ((i + 1 < len) and is_digit(s[i + 1])) {
 
@@ -278,20 +331,31 @@ private:
 			
 			}
 
-			else if (is_binary_operation(current)) {
+			if (is_binary_operation(current)) {
 
-				bool operand1 = stack.pop();
-				bool operand2 = stack.pop();
+				double operand1 = stack.pop();
+				if (stack.is_empty()) {
 
-				auto function = binary_operations[current];
-				stack.push(function.function(operand2, operand1));
+					auto function = unary_operations[current];
+					stack.push(function.function(operand1));
+
+				}
+
+				else {
+
+					double operand2 = stack.pop();
+
+					auto function = binary_operations[current];
+					stack.push(function.function(operand2, operand1));
+
+				}
 
 
 			}
 
-			else if (is_prefix_function(current)) {
+			if (is_prefix_function(current)) {
 
-				bool operand = stack.pop();
+				double operand = stack.pop();
 
 				auto function = unary_operations[current];
 				stack.push(function.function(operand));
@@ -309,9 +373,39 @@ private:
 public:
 
 	//  онструктор - пустой, как мо€ жизнь
-	ArithemticalExpression() {
+	ArithmeticalExpression() {
 
 		//  init all maps
+
+		unary_operation un_op;
+		un_op.priority = 2;
+		un_op.function = _log;
+		unary_operations["log"] = un_op;
+
+		un_op.priority = 1;
+		un_op.function = _opp;
+		unary_operations["~"] = un_op;
+
+		binary_operation bin_op;
+		bin_op.priority = 1;
+		bin_op.function = _expo;
+		binary_operations["^"] = bin_op;
+
+		bin_op.priority = 2;
+		bin_op.function = _mult;
+		binary_operations["*"] = bin_op;
+
+		bin_op.priority = 2;
+		bin_op.function = _div;
+		binary_operations["/"] = bin_op;
+
+		bin_op.priority = 3;
+		bin_op.function = _sum;
+		binary_operations["+"] = bin_op;
+
+		bin_op.priority = 3;
+		bin_op.function = _sub;
+		binary_operations["-"] = bin_op;
 		
 	}
 
@@ -324,7 +418,7 @@ public:
 	}
 
 	// посчитать выражение дл€ values
-	bool count(std::vector<double> values) {
+	double count(std::vector<double> values) {
 
 		return count_infix(values);
 
