@@ -3,8 +3,22 @@
 #include <random>
 #include "ArithmeticalExpression.h"
 
-const int num_steps_to_log = 500;
+struct config {
 
+	// One of those parameteres is reqierable
+	int number_of_variables = 0; // numbers of variables in function - if not stated, will take from points.size()
+	std::vector<double> points; // starting points - if stated number of variables, it will be randomed from normal distribution with a = 0, sigma = 1
+	// Optional parameteres
+	double lr = 0.1; // learning rate
+	double eps = 10e-6; // accuracy of counting derrivatives and function
+	int MAX_STEPS = INT_FAST32_MAX; // max steps for descent
+	int number_steps_to_log = 100; // number steps to log derivatives and function value
+	bool logs = false; // is require logs for every number_steps_to_log step
+
+};
+
+// First version of gradient descent for one-dimensional function - needes buint in C++ function and derivative
+/*
 double grad_descent_1d(std::function<double(double)> func, std::function<double(double)> deriv,
 	double start = NULL, double lr = 0.01, double eps = 0.00001, bool logs = false) {
 
@@ -24,14 +38,13 @@ double grad_descent_1d(std::function<double(double)> func, std::function<double(
 
 	double estimate = start;
 	int steps = 0;
-	const int MAX_STEPS = INT_FAST32_MAX;
 	double functional = func(start);
 	double current_functional = 0;
 
 	while (true) {
 
 		estimate = estimate - lr * deriv(estimate);
-		if ((logs) and (steps % num_steps_to_log == 0)) {
+		if ((logs) and (steps % 500 == 0)) {
 
 			//std::cout << "Deriv = " << abs(deriv(estimate)) << " | " ;
 			//std::cout << "Value of function = " << func(estimate) << std::endl;
@@ -52,20 +65,66 @@ double grad_descent_1d(std::function<double(double)> func, std::function<double(
 	return estimate;
 
 }
+*/
 
-std::vector<double> grad_descent(std::function<double(std::vector<double>)> func, std::function<std::vector<double>(std::vector<double>)> deriv,
-	std::vector<double> start, bool need_start = false, double lr = 0.1, double eps = 0.0000001, bool logs = false) {
+// Auto gradient functions
+// by using aproximation for derivative by dy/dx = lim eps->0 ( f(x + eps) - f(x) ) / eps
+// they can count and return value for derrivatives from all variables
+// for n-dimensional function it will be as :
+// dz/dx = lim eps->0 ( f(x + eps, y) - f(x, y) ) / eps
+// dz/dy = lim eps->0 ( f(x, y + eps) - f(x, y) ) / eps
+std::vector<double> autograd(ArithmeticalExpression& func, std::vector<double> estimate) {
 
-	std::random_device rd{};
-	std::mt19937 gen{ rd() };
+	auto temporary_increment = estimate;
+	auto result = estimate;
+	double eps = 0.00001;
+
+	for (int i = 0; i < estimate.size(); i++) {
+
+		temporary_increment = estimate;
+		temporary_increment[i] += eps;
+		result[i] = (func.count(temporary_increment) - func.count(estimate)) / eps;
+
+	}
+
+	return result;
+
+}
+
+std::vector<double> autograd(std::function<double(std::vector<double>)> func, std::vector<double> estimate) {
+
+	auto temporary_increment = estimate;
+	auto result = estimate;
+	double eps = 0.00001;
+
+	for (int i = 0; i < estimate.size(); i++) {
+
+		temporary_increment = estimate;
+		temporary_increment[i] += eps;
+		result[i] = (func(temporary_increment) - func(estimate)) / eps;
+
+	}
+
+	return result;
+
+}
+
+
+std::vector<double> grad_descent(std::function<double(std::vector<double>)> func, \
+	std::function<std::vector<double>(std::vector<double>)> deriv, \
+	config config\
+) {
 
 	// values near the mean are the most likely
 	// standard deviation affects the dispersion of generated values from the mean
+	std::random_device rd{};
+	std::mt19937 gen{ rd() };
 	std::normal_distribution<> d;
 
-	int number_dimensions = start.size();
+	int number_dimensions = config.number_of_variables;
+	std::vector<double> start(number_dimensions);
 
-	if (need_start) {
+	if (number_dimensions != 0) {
 
 		for (int i = 0; i < number_dimensions; i++) {
 
@@ -74,19 +133,60 @@ std::vector<double> grad_descent(std::function<double(std::vector<double>)> func
 		}
 
 	}
+	else {
+
+		start = config.points;
+		if (start.size() < 1) {
+
+			return std::vector<double>(0);
+
+		}
+
+	}
 
 	std::vector<double> estimate = start;
-	int steps = 0;
-	const int MAX_STEPS = INT_FAST32_MAX;
+	int number_of_steps = 0;
+
+	double lr = config.lr;
+	double eps = config.eps;
+	bool logs = config.logs;
+
 	double functional = func(start);
 
 	while (true) {
-		
+
+		if (number_of_steps >= config.MAX_STEPS) {
+
+			if ((logs) and (number_of_steps % config.number_steps_to_log == 0)) {
+
+				std::cout << "Number of steps was exceeded" << std::endl;
+
+			}
+
+		}
+
 		auto gradient = deriv(estimate);
+		if ((logs) and (number_of_steps % config.number_steps_to_log == 0)) {
+
+			std::cout << "Parameteres values: " << std::endl;
+
+		}
 		for (int i = 0; i < number_dimensions; i++) {
 
 			estimate[i] = estimate[i] - lr * gradient[i];
-			//std::cout << "x_" << i << " = " << estimate[i] << std::endl;
+			if ((logs) and (number_of_steps % config.number_steps_to_log == 0)) {
+
+				std::cout << "x_" << i << " = " << estimate[i] << std::endl;
+
+			}
+
+		}
+
+		auto current_functional = func(estimate);
+		if ((logs) and (number_of_steps % config.number_steps_to_log == 0)) {
+
+			std::cout << "Last function value = " << functional << ". Current value = " << current_functional << ". Delta = " \
+				<< functional - current_functional << std::endl;
 
 		}
 
@@ -100,14 +200,15 @@ std::vector<double> grad_descent(std::function<double(std::vector<double>)> func
 			}
 
 		}
-		// std::cout << "Func = " << functional << ". Current = " << func(estimate) << std::endl;
 
-		if (!f or (abs(functional - func(estimate)) < eps)) {
+		if (!f or (abs(functional - current_functional) < eps)) {
 
 			break;
 
 		}
-		functional = func(estimate);
+
+		functional = current_functional;
+		number_of_steps++;
 
 	}
 
@@ -115,36 +216,19 @@ std::vector<double> grad_descent(std::function<double(std::vector<double>)> func
 
 }
 
-std::vector<double> autograd(ArithmeticalExpression& func, std::vector<double> estimate) {
-
-	auto t = estimate;
-	auto result = estimate;
-	double eps = 0.00001;
-
-	for (int i = 0; i < estimate.size(); i++) {
-
-		t = estimate;
-		t[i] += eps;
-		result[i] = (func.count(t) - func.count(estimate)) / eps;
-
-	}
-
-	return result;
-
-}
-
-std::vector<double> grad_descent_arithm(ArithmeticalExpression& f, std::vector<double> start, bool need_start = false, double lr = 0.1, double eps = 0.0000001, bool logs = false) {
-	
-	std::random_device rd{};
-	std::mt19937 gen{ rd() };
+std::vector<double> grad_descent(std::function<double(std::vector<double>)> func, \
+	config config) {
 
 	// values near the mean are the most likely
 	// standard deviation affects the dispersion of generated values from the mean
+	std::random_device rd{};
+	std::mt19937 gen{ rd() };
 	std::normal_distribution<> d;
 
-	int number_dimensions = start.size();
+	int number_dimensions = config.number_of_variables;
+	std::vector<double> start(number_dimensions);
 
-	if (need_start) {
+	if (number_dimensions != 0) {
 
 		for (int i = 0; i < number_dimensions; i++) {
 
@@ -153,20 +237,60 @@ std::vector<double> grad_descent_arithm(ArithmeticalExpression& f, std::vector<d
 		}
 
 	}
+	else {
+
+		start = config.points;
+		if (start.size() < 1) {
+
+			return std::vector<double> (0);
+
+		}
+
+	}
 
 	std::vector<double> estimate = start;
-	int steps = 0;
-	const int MAX_STEPS = INT_FAST32_MAX;
-	ArithmeticalExpression func = f;
-	double functional = func.count(start);
-	
+	int number_of_steps = 0;
+
+	double lr = config.lr;
+	double eps = config.eps;
+	bool logs = config.logs;
+
+	double functional = func(start);
+
 	while (true) {
+		
+		if (number_of_steps >= config.MAX_STEPS) {
+
+			if ((logs) and (number_of_steps % config.number_steps_to_log == 0)) {
+
+				std::cout << "Number of steps was exceeded" << std::endl;
+
+			}
+
+		}
 
 		auto gradient = autograd(func, estimate);
+		if ((logs) and (number_of_steps % config.number_steps_to_log == 0)) {
+
+			std::cout << "Parameteres values: " << std::endl;
+
+		}
 		for (int i = 0; i < number_dimensions; i++) {
 
 			estimate[i] = estimate[i] - lr * gradient[i];
-			//std::cout << "x_" << i << " = " << estimate[i] << std::endl;
+			if ((logs) and (number_of_steps % config.number_steps_to_log == 0)) {
+
+				std::cout << "x_" << i << " = " << estimate[i] << std::endl;
+
+			}
+
+		}
+	
+		auto current_functional = func(estimate);
+		if ((logs) and (number_of_steps % config.number_steps_to_log == 0)) {
+
+			std::cout << "Last function value = " << functional << ". Current value = " << current_functional << ". Delta = " \
+				<< functional - current_functional << std::endl;
 
 		}
 
@@ -180,14 +304,118 @@ std::vector<double> grad_descent_arithm(ArithmeticalExpression& f, std::vector<d
 			}
 
 		}
-		//std::cout << "Func = " << functional << ". Current = " << func.count(estimate) << std::endl;
 
-		if (!f or (abs(functional - func.count(estimate)) < eps)) {
+		if (!f or (abs(functional - current_functional) < eps)) {
 
 			break;
 
 		}
-		functional = func.count(estimate);
+
+		functional = current_functional;
+		number_of_steps++;
+
+	}
+
+	return estimate;
+
+}
+
+std::vector<double> grad_descent(ArithmeticalExpression& func, config config) {
+	
+	std::random_device rd{};
+	std::mt19937 gen{ rd() };
+
+	// values near the mean are the most likely
+	// standard deviation affects the dispersion of generated values from the mean
+	std::normal_distribution<> d;
+
+	int number_dimensions = config.number_of_variables;
+	std::vector<double> start(number_dimensions);
+
+	if (number_dimensions != 0) {
+
+		for (int i = 0; i < number_dimensions; i++) {
+
+			start[i] = d(gen);
+
+		}
+
+	}
+	else {
+
+		start = config.points;
+		if (start.size() < 1) {
+
+			return std::vector<double>(0);
+
+		}
+
+	}
+
+	std::vector<double> estimate = start;
+	int number_of_steps = 0;
+
+	double lr = config.lr;
+	double eps = config.eps;
+	bool logs = config.logs;
+
+	double functional = func.count(start);
+	
+	while (true) {
+
+		if (number_of_steps >= config.MAX_STEPS) {
+
+			if ((logs) and (number_of_steps % config.number_steps_to_log == 0)) {
+
+				std::cout << "Number of steps was exceeded" << std::endl;
+
+			}
+
+		}
+
+		auto gradient = autograd(func, estimate);
+		if ((logs) and (number_of_steps % config.number_steps_to_log == 0)) {
+
+			std::cout << "Parameteres values: " << std::endl;
+
+		}
+		for (int i = 0; i < number_dimensions; i++) {
+
+			estimate[i] = estimate[i] - lr * gradient[i];
+			if ((logs) and (number_of_steps % config.number_steps_to_log == 0)) {
+
+				std::cout << "x_" << i << " = " << estimate[i] << std::endl;
+
+			}
+
+		}
+
+		auto current_functional = func.count(estimate);
+		if ((logs) and (number_of_steps % config.number_steps_to_log == 0)) {
+
+			std::cout << "Last function value = " << functional << ". Current value = " << current_functional << ". Delta = " \
+				<< functional - current_functional << std::endl;
+
+		}
+
+		bool f = false;
+		for (int i = 0; i < number_dimensions; i++) {
+
+			if (abs(autograd(func, estimate)[i]) > eps) {
+
+				f = true;
+
+			}
+
+		}
+
+		if (!f or (abs(functional - current_functional) < eps)) {
+
+			break;
+
+		}
+		functional = current_functional;
+		number_of_steps++;
 
 	}
 
