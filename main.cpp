@@ -40,6 +40,9 @@ std::vector<double> test_deriv_n_dim(std::vector<double> x) {
 
 int main() {
 
+	// old test for one-dimensional descent testing
+	/*
+
 	std::cout << "F(x)=" << " 3^(-x) + 3^(x-2) + 2"<< std::endl;
 	double x_min = grad_descent_1d(test_func, autog, 0, 0.01, 0.00001, true);
 	std::cout << "x_min = " << x_min << std::endl;
@@ -50,20 +53,47 @@ int main() {
 		std::cout << "x_" << i << " = " << min[i] << std::endl;
 
 	}
-
 	std::cout << "F(x_min) = " << test_func_n_dim(min) << std::endl;
-	std::string s;
-	std::cout << "F(x) = ";
-	std::getline(std::cin, s);
+
+	*/
+
+	std::string s = "3^(~x) + 3^(x-2) + 2";
+	std::cout << "F(x) = " << s << std::endl;
 	ArithmeticalExpression expression;
 	expression.set_formula(s); 
-	min = grad_descent_arithm(expression, std::vector<double>(2, 0), true);
+
+	config config;
+
+	std::vector<double> min = grad_descent(expression, config);
+
 	for (int i = 0; i < min.size(); i++) {
 
-		std::cout << "x_m"<< i <<" = " << min[i] << std::endl;
+		std::cout << "x_"<< i <<" = " << min[i] << std::endl;
 
 	}
 
-	std::cout << "F(x_min) = " << expression.count(min) << std::endl;
+	std::cout << std::endl;
+	std::cout << "F(x) = " << "(x-2)^2/9 + (y+3)^2/4" << std::endl;
+	config.number_of_variables = 2;
+
+	min = grad_descent(test_func_n_dim, test_deriv_n_dim, config);
+	for (int i = 0; i < min.size(); i++) {
+
+		std::cout << "x_" << i << " = " << min[i] << std::endl;
+
+	}
+	std::cout << "F(x_min) = " << test_func_n_dim(min) << std::endl;
+
+	std::cout << std::endl;
+	std::cout << "F(x) = " << "(x-2)^2/9 + (y+3)^2/4" << std::endl;
+
+	min = grad_descent(test_func_n_dim, config);
+	for (int i = 0; i < min.size(); i++) {
+
+		std::cout << "x_" << i << " = " << min[i] << std::endl;
+
+	}
+	std::cout << "F(x_min) = " << test_func_n_dim(min) << std::endl;
+
 
 }
