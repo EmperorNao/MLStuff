@@ -18,27 +18,27 @@
     <ClCompile Include="main.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="GradientTesting.cpp">
+    <ClCompile Include="GradientDescents\grad.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="ArithmeticalExpression.cpp">
+    <ClCompile Include="GradientDescents\GradientTesting.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="grad.cpp">
+    <ClCompile Include="ArithmeticalExpression\ArithmeticalExpression.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="grad.h">
+    <ClInclude Include="ArithmeticalExpression\ArithmeticalExpression.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="Stack.h">
+    <ClInclude Include="GradientDescents\grad.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="ArithmeticalExpression.h">
+    <ClInclude Include="GradientDescents\GradientsTesting.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="GradientsTesting.h">
+    <ClInclude Include="Stack\Stack.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

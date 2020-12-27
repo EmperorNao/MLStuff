@@ -1,8 +1,8 @@
 #pragma once
-
-#pragma once
 #include <iostream>
 #include <vector>
+
+// Realisation for Stack interface by vector template
 
 template <class T>
 class Stack
@@ -14,7 +14,7 @@ private:
 
 public:
 
-	Stack() {  };
+	Stack() { };
 	bool is_empty();
 	void push(T x);
 	T pop();
