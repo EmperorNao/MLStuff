@@ -123,6 +123,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ArithmeticalExpression.cpp" />
+    <ClCompile Include="grad.cpp" />
     <ClCompile Include="GradientTesting.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
