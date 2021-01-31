@@ -36,19 +36,77 @@ double _log(double a) {
 }
 
 
+double _lg(double a) {
+
+	return log10(a);
+
+}
+
+
 double _opp(double a) {
 
-	return -a;
+	return -1*a;
 
 }
 
 
 double _expo(double a, double b) {
 
-	return pow(a, b);
+	if ((b > 0) and (trunc(b) == b)) {
+
+		double exp = 1;
+		for (int i = b; i > 0; --i) {
+
+			exp *= a;
+
+		}
+
+		return exp;
+
+	}
+	else {
+
+		return pow(a, b);
+
+	}
 
 }
 
+double _sin(double a) {
+
+	return sin(a);
+
+}
+
+double _cos(double a) {
+
+	return cos(a);
+
+}
+
+double _tg(double a) {
+
+	return sin(a) / cos(a);
+
+}
+
+double _ln(double a) {
+
+	return log(a);
+
+}
+
+double _pi() {
+
+	return 3.14159265;
+
+}
+
+double _e() {
+
+	return 2.7182818284;
+
+}
 
 // Возвращает истину, если символ c является постфиксной функцией, иначе возвращает ложь
 bool ArithmeticalExpression::is_postfix_function(std::string c) {
@@ -163,7 +221,7 @@ std::string ArithmeticalExpression::dijkstra_algorithm(std::string s) {
 
 			while ((i + 1 < len) and (is_digit(s[i + 1]))) {
 
-				current += s[i];
+				current += s[i + 1];
 				i++;
 
 			}
@@ -344,14 +402,44 @@ ArithmeticalExpression::ArithmeticalExpression() {
 	un_op.function = _log;
 	unary_operations["log"] = un_op;
 
+	un_op;
+	un_op.priority = 2;
+	un_op.function = _sin;
+	unary_operations["sin"] = un_op;
+
+	un_op;
+	un_op.priority = 2;
+	un_op.function = _cos;
+	unary_operations["cos"] = un_op;
+
+	un_op;
+	un_op.priority = 2;
+	un_op.function = _tg;
+	unary_operations["tg"] = un_op;
+
 	un_op.priority = 1;
 	un_op.function = _opp;
 	unary_operations["~"] = un_op;
+
+	un_op.priority = 2;
+	un_op.function = _ln;
+	unary_operations["ln"] = un_op;
+
+	un_op.priority = 2;
+	un_op.function = _lg;
+	unary_operations["lg"] = un_op;
+
+
+
+
 
 	binary_operation bin_op;
 	bin_op.priority = 1;
 	bin_op.function = _expo;
 	binary_operations["^"] = bin_op;
+	bin_op.priority = 1;
+	bin_op.function = _expo;
+	binary_operations["$"] = bin_op;
 
 	bin_op.priority = 2;
 	bin_op.function = _mult;
@@ -374,8 +462,27 @@ ArithmeticalExpression::ArithmeticalExpression() {
 // задать формулу строкой s - посл.действие, так как сразу же переводит в инфиксную форму
 void ArithmeticalExpression::set_formula(std::string s) {
 
-	postfix = s;
-	infix = dijkstra_algorithm(s);
+	postfix = "";
+	bool f = false;
+	for (int i = 0; i < s.size(); ++i) {
+
+		if (is_digit(s[i]) and not f) {
+
+			f = true;
+			postfix += " ";
+
+
+		}
+		if ((not is_digit(s[i])) and f) {
+
+			f = false;
+			postfix += " ";
+
+		}
+		postfix += s[i];
+
+	}
+	infix = dijkstra_algorithm(postfix);
 
 }
 

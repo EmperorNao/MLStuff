@@ -3,6 +3,8 @@
 #include <random>
 #include "ArithmeticalExpression.h"
 
+// #TODO 
+// 1. rewrite config as class
 
 struct config {
 
@@ -21,7 +23,7 @@ struct config {
 
 // Auto gradient functions
 // by using aproximation for derivative by dy/dx = lim eps->0 ( f(x + eps) - f(x) ) / eps
-// they can count and return value for derrivatives from all variables
+// they can count and return values for derrivatives from all variables
 // for n-dimensional function it will be as :
 // dz/dx = lim eps->0 ( f(x + eps, y) - f(x, y) ) / eps
 // dz/dy = lim eps->0 ( f(x, y + eps) - f(x, y) ) / eps
