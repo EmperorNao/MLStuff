@@ -3,7 +3,6 @@
 #include <vector>
 
 // Realisation for Stack interface by vector template
-
 template <class T>
 class Stack
 {

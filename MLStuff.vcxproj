@@ -76,7 +76,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\D\Programming\MLStuff\Stack;C:\D\Programming\MLStuff\GradientDescents;C:\D\Programming\MLStuff\ArithmeticalExpression;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\D\Programming\MLStuff\Function;C:\D\Programming\MLStuff\Stack;C:\D\Programming\MLStuff\GradientDescents;C:\D\Programming\MLStuff\ArithmeticalExpression;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -125,12 +125,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ArithmeticalExpression\ArithmeticalExpression.cpp" />
+    <ClCompile Include="Function\Function.cpp" />
     <ClCompile Include="GradientDescents\grad.cpp" />
     <ClCompile Include="GradientDescents\GradientTesting.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArithmeticalExpression\ArithmeticalExpression.h" />
+    <ClInclude Include="Function\Function.h" />
     <ClInclude Include="GradientDescents\grad.h" />
     <ClInclude Include="GradientDescents\GradientsTesting.h" />
     <ClInclude Include="Stack\Stack.h" />

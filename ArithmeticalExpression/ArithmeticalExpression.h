@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <vector>
 #include <functional>
@@ -64,6 +65,8 @@ private:
 	// Возвращает значение = 0 - если приоритеты одинаковые, >1 - если приоритет pos1 > pos2, <1 - если приоритет pos1 < pos2
 	int is_more_prioritive(std::string c1, std::string c2);
 
+	double get_coefficient(std::string var);
+
 public:
 	// Алгоритм Дейкстры для преобразования инфиксной нотации, передаются функции, которые определяют, как будут сравниваться символы
 	// Функции, которые используются в алгоритме:
@@ -82,6 +85,8 @@ public:
 
 	// задать формулу строкой s - посл.действие, так как сразу же переводит в инфиксную форму
 	void set_formula(std::string s);
+
+	void set_variables_in_formula(std::string variables_names, std::vector<double> values);
 
 	// посчитать выражение для values
 	double count(std::vector<double> values);

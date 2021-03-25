@@ -78,6 +78,12 @@ double _sin(double a) {
 
 }
 
+double _acos(double a) {
+
+	return acos(a);
+
+}
+
 double _cos(double a) {
 
 	return cos(a);
@@ -138,7 +144,7 @@ bool ArithmeticalExpression::is_variable(char c) {
 
 bool ArithmeticalExpression::is_digit(char c) {
 
-	return (((c >= '0') and (c <= '9')) or (c == '.'));
+	return (((c >= '0') and (c <= '9')) or (c == '.') or (c == ','));
 
 }
 
@@ -412,6 +418,10 @@ ArithmeticalExpression::ArithmeticalExpression() {
 	un_op.function = _cos;
 	unary_operations["cos"] = un_op;
 
+	un_op.priority = 2;
+	un_op.function = _acos;
+	unary_operations["acs"] = un_op;
+
 	un_op;
 	un_op.priority = 2;
 	un_op.function = _tg;
@@ -437,6 +447,7 @@ ArithmeticalExpression::ArithmeticalExpression() {
 	bin_op.priority = 1;
 	bin_op.function = _expo;
 	binary_operations["^"] = bin_op;
+
 	bin_op.priority = 1;
 	bin_op.function = _expo;
 	binary_operations["$"] = bin_op;
@@ -504,3 +515,79 @@ std::string ArithmeticalExpression::get_formula() {
 	return postfix;
 
 }
+
+
+void ArithmeticalExpression::set_variables_in_formula(std::string variables_names, std::vector<double> values) {
+
+	std::string s = infix;
+
+	for (int i = 0; i < s.size(); i++) {
+
+		if (is_variable(s[i]) and !(((i > 1) and is_variable(s[i - 1]) and is_variable(s[i])) or ((i + 1 < s.size()) and is_variable(s[i]) and is_variable(s[i + 1])))) {
+
+			auto pos = variables_names.find(s[i]);
+			if (pos != std::string::npos) {
+
+				s.erase(i, 1);
+				s.insert(i, (" " + std::to_string(values[pos]) + " "));
+
+			}
+
+
+		}
+
+	}
+
+	for (int i = 0; i < variables_names.size(); ++i) {
+
+		auto pos = chars_variables.find(variables_names[i]);
+		if (pos != std::string::npos) {
+
+			chars_variables.erase(pos, 1);
+
+		}
+
+
+	}
+
+	infix = s;
+
+}
+
+
+/*
+double ArithmeticalExpression::get_coefficient(std::string var) {
+
+	int pos = postfix.find(var);
+	int i = pos;
+	double number = 0;
+	while ((postfix[i] <= ' ') and (i >= 0)) {
+
+		char ch = postfix[i];
+		std::string s;
+		s.push_back(ch);
+
+		i--;
+		if (is_binary_operation(s)) {
+
+			if (s == "*") {
+
+				// подстановка нулей и удаление свободного члена
+				int j = 0;
+				while ()
+				std::stod();
+
+			}
+
+
+		}
+		else {
+
+			return 1.0;
+
+		}
+
+	}
+
+}
+*/

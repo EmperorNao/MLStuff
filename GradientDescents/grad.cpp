@@ -58,7 +58,7 @@ double grad_descent_1d(std::function<double(double)> func, std::function<double(
 // for n-dimensional function it will be as :
 // dz/dx = lim eps->0 ( f(x + eps, y) - f(x, y) ) / eps
 // dz/dy = lim eps->0 ( f(x, y + eps) - f(x, y) ) / eps
-std::vector<double> autograd(ArithmeticalExpression& func, std::vector<double> estimate) {
+std::vector<double> autograd(RealFunction& func, std::vector<double> estimate) {
 
 	auto temporary_increment = estimate;
 	auto result = estimate;
@@ -68,9 +68,41 @@ std::vector<double> autograd(ArithmeticalExpression& func, std::vector<double> e
 
 		temporary_increment = estimate;
 		temporary_increment[i] += eps;
-		result[i] = (func.count(temporary_increment) - func.count(estimate)) / eps;
+		result[i] = (func(temporary_increment) - func(estimate)) / eps;
 
 	}
+
+	return result;
+
+}
+
+
+double autograd_1dim(RealFunction& func, double estimate) {
+
+	auto temporary_increment = estimate;
+	auto result = estimate;
+	double eps = 0.00001;
+
+	temporary_increment = estimate;
+	temporary_increment += eps;
+	result = (func(temporary_increment) - func(estimate)) / eps;
+
+	return result;
+
+}
+
+
+double autograd_2ndderiv_1dim(RealFunction& func, double estimate) {
+
+	auto temporary_increment = estimate;
+	auto result = estimate;
+	double eps = 0.0001;
+
+	temporary_increment = estimate;
+	temporary_increment += eps;
+	double t_1 = autograd_1dim(func, func(temporary_increment));
+	double t_2 = autograd_1dim(func, func(estimate));
+	result = (autograd_1dim(func, func(temporary_increment)) - autograd_1dim(func, func(estimate))) / eps;
 
 	return result;
 
@@ -308,7 +340,7 @@ std::vector<double> grad_descent(std::function<double(std::vector<double>)> func
 }
 
 
-std::vector<double> grad_descent(ArithmeticalExpression& func, config config) {
+std::vector<double> grad_descent(RealFunction& func, config config) {
 
 	std::random_device rd{};
 	std::mt19937 gen{ rd() };
@@ -347,7 +379,7 @@ std::vector<double> grad_descent(ArithmeticalExpression& func, config config) {
 	double eps = config.eps;
 	bool logs = config.logs;
 
-	double functional = func.count(start);
+	double functional = func(start);
 
 	while (true) {
 
@@ -378,7 +410,7 @@ std::vector<double> grad_descent(ArithmeticalExpression& func, config config) {
 
 		}
 
-		auto current_functional = func.count(estimate);
+		auto current_functional = func(estimate);
 		if ((logs) and (number_of_steps % config.number_steps_to_log == 0)) {
 
 			std::cout << "Last function value = " << functional << ". Current value = " << current_functional << ". Delta = " \

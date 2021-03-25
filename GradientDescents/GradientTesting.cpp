@@ -43,11 +43,11 @@ void TestsGradientDescents::test_simple_gradient_descent_1d() {
 	std::string s = "3^(~x) + 3^(x-2) + 2";
 	std::cout << "F(x) = " << s << std::endl;
 
-	ArithmeticalExpression expression;
-	expression.set_formula(s);
+	RealFunction f;
+	f.set_formul(s);
 
-	std::vector<double> min = grad_descent(expression, config);
-	std::string chars = expression.get_variables();
+	std::vector<double> min = grad_descent(f, config);
+	std::string chars = f.get_variables();
 
 	for (int i = 0; i < min.size(); i++) {
 
@@ -55,7 +55,7 @@ void TestsGradientDescents::test_simple_gradient_descent_1d() {
 
 	}
 
-	std::cout << "F(x_min) = " << expression.count(min) << std::endl;
+	std::cout << "F(x_min) = " << f(min) << std::endl;
 	std::cout << "Real x_min = 1" << std::endl << "Real F(x_min) = 2.666667" << std::endl << std::endl;
 
 }

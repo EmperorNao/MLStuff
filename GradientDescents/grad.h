@@ -2,6 +2,11 @@
 #include <functional>
 #include <random>
 #include "ArithmeticalExpression.h"
+#include "Function.h"
+
+
+typedef Function<double> RealFunction;
+
 
 // #TODO 
 // 1. rewrite config as class
@@ -17,17 +22,24 @@ struct config {
 	int MAX_STEPS = INT_FAST32_MAX; // max steps for descent
 	int number_steps_to_log = 100; // number steps to log derivatives and function value
 	bool logs = false; // is require logs for every number_steps_to_log step
+	std::string filename = "con"; // file in which to out logs
 
-};
+};	
 
 
 // Auto gradient functions
 // by using aproximation for derivative by dy/dx = lim eps->0 ( f(x + eps) - f(x) ) / eps
 // they can count and return values for derrivatives from all variables
-// for n-dimensional function it will be as :
+// for 2-dimensional function it will be as :
 // dz/dx = lim eps->0 ( f(x + eps, y) - f(x, y) ) / eps
 // dz/dy = lim eps->0 ( f(x, y + eps) - f(x, y) ) / eps
-std::vector<double> autograd(ArithmeticalExpression& func, std::vector<double> estimate);
+std::vector<double> autograd(RealFunction& func, std::vector<double> estimate);
+
+
+double autograd_1dim(RealFunction& func, double estimate);
+
+
+double autograd_2ndderiv_1dim(RealFunction& func, double estimate);
 
 
 std::vector<double> autograd(std::function<double(std::vector<double>)> func, std::vector<double> estimate);
@@ -43,4 +55,4 @@ std::vector<double> grad_descent(std::function<double(std::vector<double>)> func
 	config config);
 
 
-std::vector<double> grad_descent(ArithmeticalExpression& func, config config);
+std::vector<double> grad_descent(RealFunction& func, config config);
